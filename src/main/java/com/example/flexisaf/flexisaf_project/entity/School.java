@@ -1,8 +1,14 @@
 package com.example.flexisaf.flexisaf_project.entity;
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "schools")
 public class School {
@@ -38,6 +44,7 @@ public class School {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+<<<<<<< HEAD
 
     public Long getId() {
         return id;
@@ -134,3 +141,6 @@ public class School {
         this.createdAt = createdAt;
     }
 }
+=======
+}
+>>>>>>> origin/master

@@ -1,22 +1,30 @@
-SCHOOL DATABASE PROJECT
-
-This project demonstrates using Hibernate annotations to design a database table (entity) for a School, with at least 10 fields. 
-It also includes database migration using MySQL and Flyway to manage the database schema's version control.
+                        SCHOOL DATABASE PROJECT
+This project demonstrates building a complete Spring Boot application for managing school data, featuring Hibernate annotations,
+MySQL database integration, Flyway migrations, and a full service layer with dependency injection.
 
 PROJECT OVERVIEW
+This project implements a complete REST API for managing school records, including:
 
-This project creates a School entity with various attributes such as name, address, contact information, and other relevant details. It uses Hibernate annotations to map the entity to a database table .It also includes database migration using MySQL and Flyway to manage the database schema's version control.
+School entity with various attributes
+Repository layer for data access
+Service layer with dependency injection
+REST controllers for 5 API endpoints
+Database migration using Flyway
+Proper error handling
 
 TECHNOLOGIES USED
 
 Java
-Hibernate
 Spring Boot
+Spring Data JPA
+Hibernate
 MySQL
-flyway
+Flyway
 
-SCHOOL ENTITY
-The School entity is designed with the following fields:
+ARCHITECTURE
+
+1. Entity Layer
+   The School entity includes the following fields:
 
 id (Long)
 name (String)
@@ -29,42 +37,108 @@ totalStudents (Integer)
 totalStaff (Integer)
 createdAt (LocalDateTime)
 
-
-Important Hibernate annotations used include:
+Important annotations used:
 
 @Entity
-@Table
+@Table(name = "schools")
+@Column
 @Id
 @GeneratedValue
-@Column
 @CreationTimestamp
 
+2. Repository Layer
+ @Repository
+   public interface SchoolRepository extends JpaRepository<School, Long> {
+   Optional<School> findByEmail(String email);
+   }
 
-DATABASE MIGRATION
-This project uses Flyway to manage database migration. The initial migration script (V1__Create_schools_table.sql) creates the school's table with all the necessary fields.
+3. Service Layer
+   The service layer implements business logic with dependency injection:
+   @Service
+   public class SchoolServiceImpl implements SchoolService {
+   private final SchoolRepository schoolRepository;
 
-Flyway ensures that the database schema is kept in sync with the application by applying versioned migrations in SQL scripts.
+  ## Constructor injection
+   public SchoolServiceImpl(SchoolRepository schoolRepository) {
+   this.schoolRepository = schoolRepository;
+   }
 
-Migration Directory:
-The migration files are located in:
+  ## CRUD operations
 
-src/main/resources/db/migration
-Example migration file:
-sql
-Copy code
-CREATE TABLE schools (
-id BIGINT NOT NULL AUTO_INCREMENT,
-name VARCHAR(255) NOT NULL,
-address VARCHAR(255),
-phone_number VARCHAR(20),
-email VARCHAR(255),
-principal_name VARCHAR(255),
-foundation_year INT,
-total_students INT,
-total_staff INT,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-PRIMARY KEY (id)
-);
+   public School createSchool(School school) {
+   return schoolRepository.save(school);
+   }
+
+   public School getSchoolById(Long id) {
+   return schoolRepository.findById(id)
+   .orElseThrow(() -> new RuntimeException("School not found with id: " + id));
+   }
+
+   public School updateSchool(Long id, School schoolDetails) {
+   School school = getSchoolById(id);
+
+        school.setName(schoolDetails.getName());
+        school.setAddress(schoolDetails.getAddress());
+        school.setPhoneNumber(schoolDetails.getPhoneNumber());
+        school.setEmail(schoolDetails.getEmail());
+        school.setPrincipalName(schoolDetails.getPrincipalName());
+        school.setFoundationYear(schoolDetails.getFoundationYear());
+        school.setTotalStudents(schoolDetails.getTotalStudents());
+        school.setTotalStaff(schoolDetails.getTotalStaff());
+        
+        return schoolRepository.save(school);
+   }
+   }
+  ## DATABASE MIGRATION
+
+   This project uses Flyway to manage database migrations. Migration files are located in:
+   src/main/resources/db/migration
+   Example migration file (V1__Create_schools_table.sql):
+   CREATE TABLE schools (
+   id BIGINT NOT NULL AUTO_INCREMENT,
+   name VARCHAR(100) NOT NULL,
+   address VARCHAR(200) NOT NULL,
+   phone_number VARCHAR(20),
+   email VARCHAR(100) NOT NULL UNIQUE,
+   principal_name VARCHAR(100),
+   foundation_year INT,
+   total_students INT,
+   total_staff INT,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (id)
+   );
+
+SETUP AND INSTALLATION
+
+Clone the repository:
+
+bash-git clone https://github.com/OKOSUNFAITH/school_database.git
+
+Navigate to the project directory:
+
+cd school_database
+
+Configure your database connection in application.properties:
+
+properties
+
+spring.datasource.url=jdbc:mysql://localhost:3306/school_database
+spring.datasource.username=username
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=validate
+spring.flyway.enabled=true
+
+Run the application:
+./mvnw spring-boot:run
+
+API ENDPOINTS
+
+GET /api/schools - Get all schools
+GET /api/schools/{id} - Get a specific school
+POST /api/schools - Create a new school
+PUT /api/schools/{id} - Update a school
+DELETE /api/schools/{id} - Delete a school
+
 SETUP AND INSTALLATION
 Clone the repository:
 
@@ -76,13 +150,7 @@ Update application.properties with your database credentials.
 
 Run the application:
 ./mvnw spring-boot:run
-This will automatically run Flyway migrations and set up the database schema for you.
-
-Clone the repository:
-Copygit clone https://github.com/OKOSUNFAITH/school_database.git
-
-Navigate to the project directory:
-Copy cd school_database
+This will automatically run Flyway migrations and set up the database schema.
 
 
 
